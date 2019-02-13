@@ -1,5 +1,6 @@
 import React from 'react'
 import CalcButton from './calcButton'
+import {calculateAnswer} from './modules/math'
 
 class Calculator extends React.Component{
     constructor(props){
@@ -25,81 +26,20 @@ class Calculator extends React.Component{
         })
     }
 
-    calculateAnswer(){
-        // Uses a tree to solve the problem
-        const equationTree = this.calcTree(this.state.calcString)
-        const sol = this.solve(equationTree)
-        this.setState({
-            solved:true,
-            solution: sol
-        })
-    }
-
-    calcTree(equationStr){
-        console.log(equationStr)
-        if(!(equationStr.length > 0)){
-            return
-        }
-
-        let symbols = ['+','-','^','*','/','%']
-        for(let i = 0; i< symbols.length; i++){
-            let index = equationStr.indexOf(symbols[i]);
-            if((index !== -1)){
-                let nextNode = new Node(equationStr.slice(index, index + 1))
-                nextNode.left = this.calcTree(equationStr.slice(0, index))
-                nextNode.right = this.calcTree(equationStr.slice(index + 1, equationStr.length))
-                console.log(nextNode)
-                return nextNode
-            }
-        }
-        return new Node(parseFloat(equationStr))
-    }
-
-    solve(node, val=0){
-        if(node){
-            console.log(node.value)
-            if(this.isNumeric(node.value)){
-                return node.value
-            }
-            else{
-                switch(node.value){
-                    case '*':
-                        return this.solve(node.left) * this.solve(node.right)
-                    case '/':
-                        return this.solve(node.left) / this.solve(node.right)
-                    case '+':
-                        return this.solve(node.left) + this.solve(node.right)
-                    case '-':
-                        return this.solve(node.left) - this.solve(node.right)
-                    case '%':
-                        return this.solve(node.left) % this.solve(node.right)
-                    case '^':
-                        return this.toPower(this.solve(node.left),  this.solve(node.right))
-                    default:
-                        return 0
-                }
-            }
-        }
-    }
-
-    isNumeric(value){
-        return !isNaN(value - parseFloat(value));
-    }
-
-    toPower(num, pow){
-        if(pow > 1){
-            pow--
-            return(num * this.toPower(num, pow))         
-        }
-        return num
-    }
-
     idGenerator(){
         let id = 0
         return () => {
             id++;
             return id;
         }
+    }
+
+    handleCalculation(){
+        let answer = calculateAnswer(this.state.calcString)
+        this.setState({
+            solution:answer,
+            solved: true
+        })
     }
 
     render(){
@@ -117,7 +57,7 @@ class Calculator extends React.Component{
                     {buttonElements}
                 </div>
                 <div>
-                    <button onClick={() => {this.calculateAnswer()}}>Calculate</button>
+                    <button onClick={() => {this.handleCalculation()}}>Calculate</button>
                 </div>
                 <div hidden={!this.state.solved}>
                     <h1> The solution to the problem is: {this.state.solution}</h1>
@@ -129,10 +69,3 @@ class Calculator extends React.Component{
 
 export default Calculator
 
-class Node{
-    constructor(value, left = null, right = null){
-        this.value = value
-        this.left = left
-        this.right = right
-    }
-}
