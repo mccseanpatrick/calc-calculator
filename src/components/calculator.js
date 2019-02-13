@@ -1,6 +1,6 @@
 import React from 'react'
 import CalcButton from './calcButton'
-import {calculateAnswer} from './modules/math'
+import {calculateAnswer} from '../modules/math'
 
 class Calculator extends React.Component{
     constructor(props){
